@@ -1,0 +1,11 @@
+# Local config
+*.dev
+!.dev.example
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
