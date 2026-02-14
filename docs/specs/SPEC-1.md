@@ -14,6 +14,7 @@ Il progetto deve essere a costo zero (Firebase piano gratuito), sviluppato preva
 - Inserimento libro tramite ISBN, foto copertina, titolo
 - Recupero automatico metadati
 - Import EPUB locale (solo metadati)
+- Export intera libreria in CSV (solo Owner)
 - Accesso web + mobile
 - Gestione utenti e permessi (Owner / Viewer)
 - Note e valutazioni condivise
@@ -53,7 +54,7 @@ Il progetto deve essere a costo zero (Firebase piano gratuito), sviluppato preva
 ### Sicurezza
 
 - Firestore Rules con controllo membership library
-- Owner: scrittura
+- Owner: scrittura + export CSV
 - Viewer: sola lettura
 
 ## Criteri di accettazione
@@ -61,3 +62,4 @@ Il progetto deve essere a costo zero (Firebase piano gratuito), sviluppato preva
 - Inserimento libro < 30s
 - Nessun duplicato
 - Viewer non può modificare
+- Owner può esportare l'intera libreria in CSV da UI

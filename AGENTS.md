@@ -24,6 +24,21 @@ These instructions apply to all automated agents working in this repository.
 - Repository pattern for Firestore
 - No direct Firestore access from components
 
+## Clean Code
+- Keep components and functions small and focused on a single responsibility
+- Prefer descriptive names over abbreviations for variables, functions, and files
+- Avoid duplication: extract shared logic into `src/hooks`, `src/services`, or `src/utils`
+- Keep business logic out of UI components when possible
+- Add comments only when intent is not obvious from the code itself
+- Remove dead code, unused imports, and obsolete TODOs before merging
+- Keep TypeScript types explicit at module boundaries (props, service inputs/outputs)
+- Ensure each PR includes at least basic validation (manual smoke test or automated test)
+
+## Documentation Consistency
+- Any change to requirements, roles, permissions, or workflow must be checked for consistency across all related docs before completion
+- At minimum, cross-check `AGENTS.md`, `docs/specs/STEERING.md`, `docs/specs/SPEC-1.md`, `docs/specs/USER-STORIES.md`, and `docs/specs/TASKS-MVP.md` when one of them is modified
+- If a rule changes in one file, update the corresponding sections in the other files in the same task
+
 ## Data & Dates
 - Persist Firestore Timestamps
 - Convert to local dates only in UI
@@ -34,12 +49,12 @@ These instructions apply to all automated agents working in this repository.
 
 ## Git Workflow (Summary)
 - `main` always deployable
-- `common_dev` is the integration branch
+- `dev-common` is the integration branch
 - Use `feature/*` for development
 - Keep PRs small and focused
-- `Daniele` and `Antonio` branch from `common_dev` and merge back via PRs
-- Rebase frequently on `common_dev`
-- Promote `common_dev` to `main` only when stable
+- Personal branches (for example `dev-antonio`) branch from `dev-common` and merge back via PRs
+- Rebase frequently on `dev-common`
+- Promote `dev-common` to `main` only when stable
 
 ## Testing (Summary)
 - Daily dev and smoke tests on localhost

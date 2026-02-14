@@ -1,0 +1,23 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "books",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "libraryId", "order": "ASCENDING" },
+        { "fieldPath": "removedAt", "order": "ASCENDING" },
+        { "fieldPath": "titleLowercase", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "book_notes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "libraryId", "order": "ASCENDING" },
+        { "fieldPath": "bookId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

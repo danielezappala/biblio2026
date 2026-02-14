@@ -118,9 +118,24 @@
 
 ---
 
+
+### US-9 Esportare libreria in CSV
+
+**Come** Owner
+**Voglio** esportare tutta la libreria in un file CSV
+**Così da** poterla analizzare o archiviare offline
+
+**Criteri di accettazione**
+
+- Export di tutti i libri della libreria corrente
+- CSV con intestazioni coerenti (es. titolo, autori, ISBN, editore, data pubblicazione)
+- Download avviato lato client senza backend server-side
+- Viewer non può vedere o usare l'azione di export
+
+---
 ## Epic: Note e gestione personale
 
-### US-9 Aggiungere note condivise
+### US-10 Aggiungere note condivise
 
 **Come** Owner
 **Voglio** aggiungere note e valutazioni a un libro
@@ -133,7 +148,7 @@
 
 ---
 
-### US-10 Gestire posizione e date
+### US-11 Gestire posizione e date
 
 **Come** Owner
 **Voglio** indicare scaffale e date personalizzate
@@ -146,7 +161,7 @@
 
 ---
 
-### US-11 Gestire stato di lettura
+### US-12 Gestire stato di lettura
 
 **Come** utente
 **Voglio** segnare lo stato di lettura di un libro
@@ -161,7 +176,7 @@
 
 ## Epic: Ciclo di vita libro
 
-### US-12 Rimuovere un libro
+### US-13 Rimuovere un libro
 
 **Come** Owner
 **Voglio** segnare un libro come rimosso

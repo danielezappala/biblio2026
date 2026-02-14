@@ -2,17 +2,17 @@
 
 ## Branches
 
-- `main`: sempre stabile e deployabile. Solo merge da `common_dev`.
-- `common_dev`: integrazione continua. Deve restare verde.
-- `Daniele`, `Antonio`: branch personali per lavoro in parallelo.
+- `main`: sempre stabile e deployabile. Solo merge da `dev-common`.
+- `dev-common`: integrazione continua. Deve restare verde.
+- Branch personali (es. `dev-antonio`): lavoro in parallelo.
 
 ## Flusso consigliato (2 dev in parallelo)
 
-1. Parti sempre da `common_dev`.
-2. Sviluppa sul tuo branch personale (`Daniele` o `Antonio`).
-3. Fai PR piccole e frequenti verso `common_dev`.
-4. Revisione reciproca, merge su `common_dev`.
-5. Quando `common_dev` è stabile, PR di rilascio verso `main`.
+1. Parti sempre da `dev-common`.
+2. Sviluppa sul tuo branch personale (es. `dev-antonio`).
+3. Fai PR piccole e frequenti verso `dev-common`.
+4. Revisione reciproca, merge su `dev-common`.
+5. Quando `dev-common` è stabile, PR di rilascio verso `main`.
 
 ## Sync e Rebase
 
@@ -20,11 +20,11 @@
 
 ```bash
 git fetch origin
-git checkout Daniele
-git rebase origin/common_dev
+git checkout dev-antonio
+git rebase origin/dev-common
 ```
 
-- Se il rebase è complesso, preferisci un merge da `common_dev` al tuo branch personale.
+- Se il rebase è complesso, preferisci un merge da `dev-common` al tuo branch personale.
 
 ## Policy PR
 
@@ -33,8 +33,8 @@ git rebase origin/common_dev
 
 ## Politica di merge
 
-- Preferire `squash` su `common_dev` per tenere la storia pulita.
-- PR `common_dev` → `main` come merge commit o squash (a scelta), ma sempre con test passati.
+- Preferire `squash` su `dev-common` per tenere la storia pulita.
+- PR `dev-common` → `main` come merge commit o squash (a scelta), ma sempre con test passati.
 
 ## Convenzioni di naming
 
