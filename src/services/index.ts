@@ -1,1 +1,4 @@
-// Service layer entrypoint (Firebase repositories and external API adapters).
+export * from './auth/authService'
+export * from './repositories/booksRepository'
+export * from './repositories/librariesRepository'
+export * from './repositories/notesRepository'
