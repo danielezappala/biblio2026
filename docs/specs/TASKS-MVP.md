@@ -16,6 +16,7 @@
 - Lista libri
 - Ricerca per titolo
 - Dettaglio libro
+- Export CSV libreria (solo Owner)
 
 ## Inserimento libro
 
@@ -37,9 +38,11 @@
 
 - Firestore Rules
 - Test permessi
+- Verifica visibilità/permessi export CSV per ruolo
 
 ## QA
 
 - Test mobile
 - Test duplicati
 - Test ruoli
+- Test download CSV su desktop/mobile

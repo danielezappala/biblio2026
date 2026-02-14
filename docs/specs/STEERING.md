@@ -18,7 +18,7 @@
 ## Sicurezza
 
 - Firestore Rules con controllo membership library
-- Owner: scrittura
+- Owner: scrittura + export CSV
 - Viewer: sola lettura
 - Tutte le query filtrate per `libraryId`
 

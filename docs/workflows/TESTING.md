@@ -4,7 +4,7 @@
 
 - Sviluppo e test principale in locale.
 - Usare emulatori Firebase in locale quando possibile.
-- Verificare login, ruoli e flussi core prima di ogni merge in `common_dev`.
+- Verificare login, ruoli e flussi core prima di ogni merge in `dev-common`.
 
 ## Firebase Hosting (dev/staging)
 
