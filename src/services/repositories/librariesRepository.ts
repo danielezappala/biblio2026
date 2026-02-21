@@ -33,3 +33,24 @@ export async function createInitialLibraryWithOwnerMembership(userId: string, li
   await batch.commit()
   return libraryRef.id
 }
+
+export async function addViewerMembershipByUserId(libraryId: string, viewerUserId: string): Promise<void> {
+  const normalizedLibraryId = libraryId.trim()
+  const normalizedViewerUserId = viewerUserId.trim()
+
+  if (!normalizedLibraryId || !normalizedViewerUserId) {
+    throw new Error('libraryId e viewerUserId sono obbligatori.')
+  }
+
+  const db = getFirestoreDb()
+  const membershipRef = doc(db, 'libraries', normalizedLibraryId, 'memberships', normalizedViewerUserId)
+
+  const batch = writeBatch(db)
+  batch.set(membershipRef, {
+    userId: normalizedViewerUserId,
+    role: 'viewer',
+    createdAt: serverTimestamp(),
+  })
+
+  await batch.commit()
+}

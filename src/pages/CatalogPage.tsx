@@ -3,10 +3,14 @@ import { Link } from 'react-router-dom'
 
 import { useAuthSession, useCatalogBooks } from '@/hooks'
 import { Button } from '@/components/ui/button'
+import { addViewerMembershipByUserId } from '@/services'
 
 export function CatalogPage() {
   const { session, logout } = useAuthSession()
   const [searchPrefix, setSearchPrefix] = useState<string>('')
+  const [viewerUserId, setViewerUserId] = useState<string>('')
+  const [memberActionMessage, setMemberActionMessage] = useState<string | null>(null)
+  const [isMemberActionLoading, setIsMemberActionLoading] = useState<boolean>(false)
   const libraryId = session?.membership.libraryId ?? ''
   const { books, isLoading } = useCatalogBooks(libraryId, searchPrefix)
 
@@ -15,6 +19,22 @@ export function CatalogPage() {
   }
 
   const roleLabel = session.membership.role === 'owner' ? 'Owner' : 'Viewer'
+
+  const handleAddViewer = async () => {
+    setMemberActionMessage(null)
+    setIsMemberActionLoading(true)
+
+    try {
+      await addViewerMembershipByUserId(session.membership.libraryId, viewerUserId)
+      setMemberActionMessage('Viewer aggiunto correttamente.')
+      setViewerUserId('')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore durante aggiunta viewer.'
+      setMemberActionMessage(message)
+    } finally {
+      setIsMemberActionLoading(false)
+    }
+  }
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-4xl px-4 py-6">
@@ -43,6 +63,26 @@ export function CatalogPage() {
           className="mt-2 h-10 w-full rounded-md border bg-background px-3 text-sm"
         />
       </section>
+
+      {session.membership.role === 'owner' ? (
+        <section className="mt-4 rounded-xl border bg-card p-4 shadow-sm">
+          <h2 className="text-sm font-semibold uppercase text-muted-foreground">Gestione membri</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Aggiungi un viewer tramite userId Firebase.</p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <input
+              type="text"
+              value={viewerUserId}
+              onChange={(event) => setViewerUserId(event.target.value)}
+              placeholder="Inserisci userId viewer"
+              className="h-10 flex-1 rounded-md border bg-background px-3 text-sm"
+            />
+            <Button type="button" disabled={isMemberActionLoading} onClick={() => void handleAddViewer()}>
+              {isMemberActionLoading ? 'Salvataggio...' : 'Aggiungi viewer'}
+            </Button>
+          </div>
+          {memberActionMessage ? <p className="mt-2 text-sm text-muted-foreground">{memberActionMessage}</p> : null}
+        </section>
+      ) : null}
 
       <section className="mt-4 space-y-2">
         {isLoading ? <p className="text-sm text-muted-foreground">Caricamento catalogo...</p> : null}
