@@ -1,6 +1,10 @@
 import {
+  browserLocalPersistence,
   GoogleAuthProvider,
+  getRedirectResult,
   onAuthStateChanged,
+  setPersistence,
+  signInWithPopup,
   signInWithRedirect,
   signOut,
   type User,
@@ -17,14 +21,42 @@ type MembershipDoc = {
   createdAt: Timestamp
 }
 
+export async function initializeAuthSession(): Promise<void> {
+  await setPersistence(getFirebaseAuth(), browserLocalPersistence)
+}
+
 export async function loginWithGoogle(): Promise<void> {
   const provider = new GoogleAuthProvider()
   provider.setCustomParameters({ prompt: 'select_account' })
-  await signInWithRedirect(getFirebaseAuth(), provider)
+  try {
+    await signInWithPopup(getFirebaseAuth(), provider)
+  } catch (error) {
+    const authError = error as { code?: string }
+    const shouldFallbackToRedirect =
+      authError.code === 'auth/popup-blocked' ||
+      authError.code === 'auth/cancelled-popup-request' ||
+      authError.code === 'auth/popup-closed-by-user' ||
+      authError.code === 'auth/internal-error' ||
+      authError.code === 'auth/network-request-failed'
+
+    if (!shouldFallbackToRedirect) {
+      throw error
+    }
+
+    await signInWithRedirect(getFirebaseAuth(), provider)
+  }
 }
 
 export async function logoutUser(): Promise<void> {
   await signOut(getFirebaseAuth())
+}
+
+export async function completeGoogleRedirectSignIn(): Promise<void> {
+  try {
+    await getRedirectResult(getFirebaseAuth())
+  } catch (error) {
+    console.error('Google redirect completion failed:', error)
+  }
 }
 
 export function subscribeAuthState(callback: (user: User | null) => void): Unsubscribe {
@@ -58,7 +90,8 @@ export function subscribePrimaryMembership(userId: string, callback: (membership
         createdAt: data.createdAt,
       })
     },
-    () => {
+    (error) => {
+      console.error('Membership listener error:', error)
       callback(null)
     }
   )

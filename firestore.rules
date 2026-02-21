@@ -29,12 +29,22 @@ service cloud.firestore {
       allow update, delete: if false;
 
       match /memberships/{userId} {
-        allow read: if isSignedIn() && userId == request.auth.uid;
+        allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
         allow create: if isSignedIn()
-          && userId == request.auth.uid
-          && request.resource.data.userId == request.auth.uid
-          && request.resource.data.role == 'owner'
-          && get(/databases/$(database)/documents/libraries/$(libraryId)).data.ownerUserId == request.auth.uid;
+          && (
+            (
+              userId == request.auth.uid
+              && request.resource.data.userId == request.auth.uid
+              && request.resource.data.role == 'owner'
+              && getAfter(/databases/$(database)/documents/libraries/$(libraryId)).data.ownerUserId == request.auth.uid
+            )
+            ||
+            (
+              isLibraryOwner(libraryId)
+              && request.resource.data.userId == userId
+              && request.resource.data.role == 'viewer'
+            )
+          );
         allow update, delete: if false;
       }
     }
