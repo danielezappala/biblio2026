@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User } from 'firebase/auth'
 
 import {
+  claimMembershipInvite,
   completeGoogleRedirectSignIn,
   createInitialLibraryWithOwnerMembership,
   initializeAuthSession,
@@ -11,9 +12,9 @@ import {
   subscribePrimaryMembership,
 } from '@/services'
 import type { AuthIdentity, AuthSession, Membership, SessionStatus } from '@/types'
+import { canSelfBootstrapLibrary } from '@/utils/auth'
 import { AuthSessionContext, type AuthSessionContextValue } from './authSessionContext'
 
-const AUTO_BOOTSTRAP_EMAIL = 'antoniogregorio@gmail.com'
 const AUTO_BOOTSTRAP_LIBRARY_NAME = 'Biblioteca di Antonio'
 const MEMBERSHIP_RESOLUTION_TIMEOUT_MS = 8000
 
@@ -22,6 +23,7 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null)
   const [membership, setMembership] = useState<Membership | null>(null)
   const hasAttemptedAutoBootstrap = useRef<boolean>(false)
+  const hasAttemptedInviteClaim = useRef<boolean>(false)
 
   useEffect(() => {
     const unsubscribeAuth = subscribeAuthState((user) => {
@@ -48,6 +50,7 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!firebaseUser) {
       hasAttemptedAutoBootstrap.current = false
+      hasAttemptedInviteClaim.current = false
       return undefined
     }
 
@@ -68,12 +71,43 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      const canAutoBootstrap =
-        firebaseUser.email?.toLowerCase() === AUTO_BOOTSTRAP_EMAIL && !hasAttemptedAutoBootstrap.current
+      const canClaimInvite = Boolean(firebaseUser.email) && !hasAttemptedInviteClaim.current
+      if (canClaimInvite) {
+        hasAttemptedInviteClaim.current = true
+        void claimMembershipInvite(firebaseUser.uid, firebaseUser.email)
+          .then((hasClaimedInvite) => {
+            if (hasClaimedInvite) {
+              setStatus('loading')
+              return
+            }
+
+            const canAutoBootstrap = canSelfBootstrapLibrary(firebaseUser.email) && !hasAttemptedAutoBootstrap.current
+
+            if (canAutoBootstrap) {
+              hasAttemptedAutoBootstrap.current = true
+              void createInitialLibraryWithOwnerMembership(firebaseUser.uid, AUTO_BOOTSTRAP_LIBRARY_NAME, firebaseUser.email)
+                .then(() => {
+                  setStatus('loading')
+                })
+                .catch(() => {
+                  setStatus('no_membership')
+                })
+              return
+            }
+
+            setStatus('no_membership')
+          })
+          .catch(() => {
+            setStatus('no_membership')
+          })
+        return
+      }
+
+      const canAutoBootstrap = canSelfBootstrapLibrary(firebaseUser.email) && !hasAttemptedAutoBootstrap.current
 
       if (canAutoBootstrap) {
         hasAttemptedAutoBootstrap.current = true
-        void createInitialLibraryWithOwnerMembership(firebaseUser.uid, AUTO_BOOTSTRAP_LIBRARY_NAME)
+        void createInitialLibraryWithOwnerMembership(firebaseUser.uid, AUTO_BOOTSTRAP_LIBRARY_NAME, firebaseUser.email)
           .then(() => {
             setStatus('loading')
           })

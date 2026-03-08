@@ -1,24 +1,53 @@
-# User Stories – Biblioteca domestica condivisa (MVP)
+# User Stories - Biblioteca domestica condivisa (MVP)
 
 ## Ruoli
 
-- **Owner**: proprietario della biblioteca (inserisce e gestisce libri)
+- **Owner**: proprietario della biblioteca (inserisce e gestisce libri, membri e export)
 - **Viewer**: familiare/amico (consulta soltanto)
 
 ---
 
 ## Epic: Autenticazione e accesso
 
-### US-1 Login
+### US-1 Login con Google
 
-**Come** utente registrato
-**Voglio** autenticarmi con email e password
-**Così da** accedere alla biblioteca condivisa
+**Come** utente autorizzato
+**Voglio** autenticarmi con il mio account Google
+**Cosi da** accedere alla biblioteca condivisa
 
 **Criteri di accettazione**
 
-- Login riuscito con credenziali valide
-- Errore chiaro in caso di credenziali errate
+- Login riuscito con account Google valido
+- Fallback redirect se il popup non e' disponibile
+- Errore chiaro in caso di autenticazione fallita
+
+---
+
+### US-1a Creare la prima libreria
+
+**Come** owner iniziale autorizzato
+**Voglio** creare la prima libreria al primo accesso
+**Cosi da** completare il bootstrap dell'applicazione
+
+**Criteri di accettazione**
+
+- Se l'utente autenticato non ha membership ma e' autorizzato al bootstrap, puo' creare una libreria
+- La libreria viene creata con membership Owner associata allo stesso utente
+- Un utente non autorizzato al bootstrap non vede questa azione
+
+---
+
+### US-1b Accedere tramite invito Viewer
+
+**Come** utente invitato
+**Voglio** entrare con la stessa email Google usata nell'invito
+**Cosi da** essere associato automaticamente alla libreria corretta
+
+**Criteri di accettazione**
+
+- L'Owner puo' salvare un invito Viewer tramite email
+- Al primo login con la stessa email Google, l'utente ottiene la membership Viewer
+- Se non esiste membership o invito valido, l'utente vede un messaggio chiaro
 
 ---
 
@@ -28,7 +57,7 @@
 
 **Come** utente (Owner o Viewer)
 **Voglio** vedere la lista dei libri della biblioteca
-**Così da** sapere quali libri sono disponibili
+**Cosi da** sapere quali libri sono disponibili
 
 **Criteri di accettazione**
 
@@ -41,7 +70,7 @@
 
 **Come** utente
 **Voglio** cercare un libro per titolo
-**Così da** trovarlo rapidamente
+**Cosi da** trovarlo rapidamente
 
 **Criteri di accettazione**
 
@@ -54,7 +83,7 @@
 
 **Come** utente
 **Voglio** vedere i dettagli di un libro
-**Così da** conoscerne informazioni e note
+**Cosi da** conoscerne informazioni e note
 
 **Criteri di accettazione**
 
@@ -68,8 +97,8 @@
 ### US-5 Aggiungere libro via ISBN
 
 **Come** Owner
-**Voglio** aggiungere un libro scansionando l’ISBN
-**Così da** inserirlo velocemente
+**Voglio** aggiungere un libro scansionando l'ISBN
+**Cosi da** inserirlo velocemente
 
 **Criteri di accettazione**
 
@@ -83,7 +112,7 @@
 
 **Come** Owner
 **Voglio** aggiungere un libro inserendo il titolo
-**Così da** catalogarlo anche senza ISBN
+**Cosi da** catalogarlo anche senza ISBN
 
 **Criteri di accettazione**
 
@@ -96,7 +125,7 @@
 
 **Come** Owner
 **Voglio** aggiungere un libro fotografando la copertina
-**Così da** ridurre l’inserimento manuale
+**Cosi da** ridurre l'inserimento manuale
 
 **Criteri di accettazione**
 
@@ -109,7 +138,7 @@
 
 **Come** Owner
 **Voglio** importare un file EPUB locale
-**Così da** estrarne automaticamente i metadati
+**Cosi da** estrarne automaticamente i metadati
 
 **Criteri di accettazione**
 
@@ -118,28 +147,28 @@
 
 ---
 
-
 ### US-9 Esportare libreria in CSV
 
 **Come** Owner
 **Voglio** esportare tutta la libreria in un file CSV
-**Cos� da** poterla analizzare o archiviare offline
+**Cosi da** poterla analizzare o archiviare offline
 
 **Criteri di accettazione**
 
 - Export di tutti i libri della libreria corrente
 - CSV con intestazioni coerenti (es. titolo, autori, ISBN, editore, data pubblicazione)
 - Download avviato lato client senza backend server-side
-- Viewer non pu� vedere o usare l'azione di export
+- Viewer non puo' vedere o usare l'azione di export
 
 ---
+
 ## Epic: Note e gestione personale
 
 ### US-10 Aggiungere note condivise
 
 **Come** Owner
 **Voglio** aggiungere note e valutazioni a un libro
-**Così da** condividerle con gli altri utenti
+**Cosi da** condividerle con gli altri utenti
 
 **Criteri di accettazione**
 
@@ -152,12 +181,12 @@
 
 **Come** Owner
 **Voglio** indicare scaffale e date personalizzate
-**Così da** tenere traccia della storia del libro
+**Cosi da** tenere traccia della storia del libro
 
 **Criteri di accettazione**
 
 - Campo scaffale libero
-- Aggiunta di più date con etichetta
+- Aggiunta di piu' date con etichetta
 
 ---
 
@@ -165,7 +194,7 @@
 
 **Come** utente
 **Voglio** segnare lo stato di lettura di un libro
-**Così da** ricordare cosa ho letto
+**Cosi da** ricordare cosa ho letto
 
 **Criteri di accettazione**
 
@@ -180,12 +209,12 @@
 
 **Come** Owner
 **Voglio** segnare un libro come rimosso
-**Così da** mantenere lo storico della biblioteca
+**Cosi da** mantenere lo storico della biblioteca
 
 **Criteri di accettazione**
 
 - Impostazione data di uscita
-- Libro non più mostrato di default
+- Libro non piu' mostrato di default
 
 ---
 

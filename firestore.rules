@@ -9,6 +9,18 @@ service cloud.firestore {
       return /databases/$(database)/documents/libraries/$(libraryId)/memberships/$(request.auth.uid);
     }
 
+    function authEmail() {
+      return request.auth.token.email;
+    }
+
+    function normalizedAuthEmail() {
+      return authEmail().lower();
+    }
+
+    function invitePath(email) {
+      return /databases/$(database)/documents/membership_invites/$(email);
+    }
+
     function isLibraryMember(libraryId) {
       return isSignedIn() && exists(membershipPath(libraryId));
     }
@@ -44,9 +56,65 @@ service cloud.firestore {
               && request.resource.data.userId == userId
               && request.resource.data.role == 'viewer'
             )
+            ||
+            (
+              userId == request.auth.uid
+              && request.resource.data.userId == request.auth.uid
+              && request.resource.data.role == 'viewer'
+              && authEmail() != null
+              && exists(invitePath(normalizedAuthEmail()))
+              && get(invitePath(normalizedAuthEmail())).data.primaryLibraryId == libraryId
+              && get(invitePath(normalizedAuthEmail())).data.role == 'viewer'
+            )
           );
         allow update, delete: if false;
       }
+    }
+
+    match /user_memberships/{userId} {
+      allow read: if isSignedIn() && userId == request.auth.uid;
+      allow create: if isSignedIn()
+        && request.resource.data.userId == userId
+        && (
+          (
+            userId == request.auth.uid
+            && request.resource.data.role == 'owner'
+            && getAfter(/databases/$(database)/documents/libraries/$(request.resource.data.primaryLibraryId)).data.ownerUserId == request.auth.uid
+          )
+          ||
+          (
+            isLibraryOwner(request.resource.data.primaryLibraryId)
+            && request.resource.data.role == 'viewer'
+          )
+          ||
+          (
+            userId == request.auth.uid
+            && request.resource.data.role == 'viewer'
+            && authEmail() != null
+            && request.resource.data.email == normalizedAuthEmail()
+            && exists(invitePath(normalizedAuthEmail()))
+            && get(invitePath(normalizedAuthEmail())).data.primaryLibraryId == request.resource.data.primaryLibraryId
+            && get(invitePath(normalizedAuthEmail())).data.role == 'viewer'
+          )
+        );
+      allow update: if isSignedIn()
+        && request.resource.data.userId == userId
+        && isLibraryOwner(request.resource.data.primaryLibraryId)
+        && request.resource.data.role == 'viewer';
+      allow delete: if false;
+    }
+
+    match /membership_invites/{email} {
+      allow read: if isSignedIn() && authEmail() != null && email == normalizedAuthEmail();
+      allow create, update: if isSignedIn()
+        && isLibraryOwner(request.resource.data.primaryLibraryId)
+        && request.resource.data.role == 'viewer'
+        && request.resource.data.email == email;
+      allow delete: if isSignedIn()
+        && (
+          (authEmail() != null && email == normalizedAuthEmail())
+          || isLibraryOwner(resource.data.primaryLibraryId)
+        );
     }
 
     match /books/{bookId} {

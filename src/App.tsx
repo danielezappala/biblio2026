@@ -4,7 +4,9 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { AuthSessionProvider } from '@/hooks'
 import { BookDetailPage } from '@/pages/BookDetailPage'
 import { CatalogPage } from '@/pages/CatalogPage'
+import { CreateLibraryPage } from '@/pages/CreateLibraryPage'
 import { LoginPage } from '@/pages/LoginPage'
+import { NoMembershipPage } from '@/pages/NoMembershipPage'
 import { firebaseConfigError } from '@/services/firebase/firebaseApp'
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
     <AuthSessionProvider>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/create-library" element={<CreateLibraryPage />} />
+        <Route path="/no-membership" element={<NoMembershipPage />} />
         <Route
           path="/catalog"
           element={

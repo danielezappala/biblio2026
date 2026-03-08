@@ -74,3 +74,8 @@ These instructions apply to all automated agents working in this repository.
 - Firebase Spark only (Hosting, Firestore, Auth)
 - No Functions, no Storage
 - Zero recurring costs
+
+## Development Log
+- Maintain docs/DEV-LOG.md as a running diary of work done
+- For each meaningful development session, record date, scope, difficulties encountered, solution adopted, and deviations from plan
+- When implementation diverges from specs or tasks, log the difference in docs/DEV-LOG.md before closing the task

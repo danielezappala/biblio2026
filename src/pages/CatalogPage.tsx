@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom'
 
 import { useAuthSession, useCatalogBooks } from '@/hooks'
 import { Button } from '@/components/ui/button'
-import { addViewerMembershipByUserId } from '@/services'
+import { addViewerInviteByEmail } from '@/services'
 
 export function CatalogPage() {
   const { session, logout } = useAuthSession()
   const [searchPrefix, setSearchPrefix] = useState<string>('')
-  const [viewerUserId, setViewerUserId] = useState<string>('')
+  const [viewerEmail, setViewerEmail] = useState<string>('')
   const [memberActionMessage, setMemberActionMessage] = useState<string | null>(null)
   const [isMemberActionLoading, setIsMemberActionLoading] = useState<boolean>(false)
   const libraryId = session?.membership.libraryId ?? ''
@@ -25,9 +25,9 @@ export function CatalogPage() {
     setIsMemberActionLoading(true)
 
     try {
-      await addViewerMembershipByUserId(session.membership.libraryId, viewerUserId)
-      setMemberActionMessage('Viewer aggiunto correttamente.')
-      setViewerUserId('')
+      await addViewerInviteByEmail(session.membership.libraryId, viewerEmail)
+      setMemberActionMessage("Invito viewer salvato. L'utente potra' entrare con Google usando questa email.")
+      setViewerEmail('')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Errore durante aggiunta viewer.'
       setMemberActionMessage(message)
@@ -67,13 +67,13 @@ export function CatalogPage() {
       {session.membership.role === 'owner' ? (
         <section className="mt-4 rounded-xl border bg-card p-4 shadow-sm">
           <h2 className="text-sm font-semibold uppercase text-muted-foreground">Gestione membri</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Aggiungi un viewer tramite userId Firebase.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Aggiungi un viewer tramite email Google.</p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <input
-              type="text"
-              value={viewerUserId}
-              onChange={(event) => setViewerUserId(event.target.value)}
-              placeholder="Inserisci userId viewer"
+              type="email"
+              value={viewerEmail}
+              onChange={(event) => setViewerEmail(event.target.value)}
+              placeholder="Inserisci email viewer"
               className="h-10 flex-1 rounded-md border bg-background px-3 text-sm"
             />
             <Button type="button" disabled={isMemberActionLoading} onClick={() => void handleAddViewer()}>

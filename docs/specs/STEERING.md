@@ -1,4 +1,4 @@
-# Steering – Biblioteca domestica condivisa
+# Steering - Biblioteca domestica condivisa
 
 ## Principi guida
 
@@ -7,6 +7,7 @@
 - Firestore come unico backend
 - API esterne gratuite (Open Library)
 - Zero costi ricorrenti
+- Google Sign-In come provider di autenticazione corrente
 
 ## Vincoli
 
@@ -18,9 +19,11 @@
 ## Sicurezza
 
 - Firestore Rules con controllo membership library
-- Owner: scrittura + export CSV
+- Owner: scrittura + gestione membri + export CSV
 - Viewer: sola lettura
 - Tutte le query filtrate per `libraryId`
+- Bootstrap iniziale libreria consentito solo all'owner previsto
+- Accesso Viewer tramite invito email e successivo login Google con la stessa email
 
 ## Dati e date
 
