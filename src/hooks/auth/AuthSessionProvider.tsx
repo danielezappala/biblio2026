@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User } from 'firebase/auth'
 
 import {
+  cleanupOwnPendingInvitesByEmail,
+  claimFirstPendingInviteByEmail,
   completeGoogleRedirectSignIn,
   createInitialLibraryWithOwnerMembership,
   initializeAuthSession,
@@ -9,6 +11,7 @@ import {
   logoutUser,
   subscribeAuthState,
   subscribePrimaryMembership,
+  syncCurrentUserLookup,
 } from '@/services'
 import type { AuthIdentity, AuthSession, Membership, SessionStatus } from '@/types'
 import { AuthSessionContext, type AuthSessionContextValue } from './authSessionContext'
@@ -22,6 +25,7 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null)
   const [membership, setMembership] = useState<Membership | null>(null)
   const hasAttemptedAutoBootstrap = useRef<boolean>(false)
+  const hasAttemptedPendingInviteClaim = useRef<boolean>(false)
 
   useEffect(() => {
     const unsubscribeAuth = subscribeAuthState((user) => {
@@ -48,7 +52,17 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!firebaseUser) {
       hasAttemptedAutoBootstrap.current = false
+      hasAttemptedPendingInviteClaim.current = false
       return undefined
+    }
+
+    if (firebaseUser.email) {
+      void syncCurrentUserLookup(firebaseUser.uid, firebaseUser.email).catch((error) => {
+        console.error('User lookup sync failed:', error)
+      })
+      void cleanupOwnPendingInvitesByEmail(firebaseUser.uid, firebaseUser.email).catch((error) => {
+        console.warn('Own pending invites cleanup skipped:', error)
+      })
     }
 
     setStatus('loading')
@@ -76,6 +90,19 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
         void createInitialLibraryWithOwnerMembership(firebaseUser.uid, AUTO_BOOTSTRAP_LIBRARY_NAME)
           .then(() => {
             setStatus('loading')
+          })
+          .catch(() => {
+            setStatus('no_membership')
+          })
+        return
+      }
+
+      const userEmail = firebaseUser.email
+      if (userEmail && !hasAttemptedPendingInviteClaim.current) {
+        hasAttemptedPendingInviteClaim.current = true
+        void claimFirstPendingInviteByEmail(firebaseUser.uid, userEmail)
+          .then((claimed) => {
+            setStatus(claimed ? 'loading' : 'no_membership')
           })
           .catch(() => {
             setStatus('no_membership')

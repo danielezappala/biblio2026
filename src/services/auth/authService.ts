@@ -10,7 +10,7 @@ import {
   type User,
 } from 'firebase/auth'
 import type { Timestamp } from 'firebase/firestore'
-import { collectionGroup, limit, onSnapshot, query, where, type Unsubscribe } from 'firebase/firestore'
+import { doc, onSnapshot, type Unsubscribe } from 'firebase/firestore'
 
 import { getFirebaseAuth, getFirestoreDb } from '@/services/firebase/firebaseApp'
 import type { Membership, UserRole } from '@/types'
@@ -64,27 +64,24 @@ export function subscribeAuthState(callback: (user: User | null) => void): Unsub
 }
 
 export function subscribePrimaryMembership(userId: string, callback: (membership: Membership | null) => void): Unsubscribe {
-  const membershipsQuery = query(collectionGroup(getFirestoreDb(), 'memberships'), where('userId', '==', userId), limit(1))
+  const membershipRef = doc(getFirestoreDb(), 'user_memberships', userId)
 
   return onSnapshot(
-    membershipsQuery,
+    membershipRef,
     (snapshot) => {
-      if (snapshot.empty) {
+      if (!snapshot.exists()) {
         callback(null)
         return
       }
 
-      const membershipDoc = snapshot.docs[0]
-      const data = membershipDoc.data() as MembershipDoc
-      const libraryRef = membershipDoc.ref.parent.parent
-
-      if (!libraryRef || !data.role || !data.userId) {
+      const data = snapshot.data() as (MembershipDoc & { libraryId?: string })
+      if (!data.libraryId || !data.role || !data.userId) {
         callback(null)
         return
       }
 
       callback({
-        libraryId: libraryRef.id,
+        libraryId: data.libraryId,
         userId: data.userId,
         role: data.role,
         createdAt: data.createdAt,

@@ -21,6 +21,24 @@ service cloud.firestore {
       return isLibraryMember(libraryId) && libraryRole(libraryId) == 'owner';
     }
 
+    function isLibraryOwnerByDoc(libraryId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/libraries/$(libraryId))
+        && get(/databases/$(database)/documents/libraries/$(libraryId)).data.ownerUserId == request.auth.uid;
+    }
+
+    function canManageLibrary(libraryId) {
+      return isLibraryOwner(libraryId) || isLibraryOwnerByDoc(libraryId);
+    }
+
+    function hasAuthEmail() {
+      return isSignedIn() && request.auth.token.email is string;
+    }
+
+    function authEmailLower() {
+      return request.auth.token.email.lower();
+    }
+
     match /libraries/{libraryId} {
       allow read: if isLibraryMember(libraryId);
       allow create: if isSignedIn()
@@ -44,9 +62,67 @@ service cloud.firestore {
               && request.resource.data.userId == userId
               && request.resource.data.role == 'viewer'
             )
+            ||
+            (
+              hasAuthEmail()
+              && userId == request.auth.uid
+              && request.resource.data.userId == request.auth.uid
+              && request.resource.data.role == 'viewer'
+              && exists(/databases/$(database)/documents/libraries/$(libraryId)/invites/$(authEmailLower()))
+              && get(/databases/$(database)/documents/libraries/$(libraryId)/invites/$(authEmailLower())).data.role == 'viewer'
+            )
           );
         allow update, delete: if false;
       }
+
+      match /invites/{emailLower} {
+        allow read: if canManageLibrary(libraryId)
+          || (hasAuthEmail() && emailLower == authEmailLower());
+        allow create, update: if canManageLibrary(libraryId)
+          && request.resource.data.emailLower == emailLower
+          && request.resource.data.role == 'viewer';
+        allow delete: if canManageLibrary(libraryId)
+          || (hasAuthEmail() && emailLower == authEmailLower());
+      }
+    }
+
+    match /user_lookup/{emailLower} {
+      allow get: if isSignedIn();
+      allow list: if false;
+      allow create, update: if hasAuthEmail()
+        && emailLower == request.auth.token.email.lower()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.emailLower == emailLower
+        && request.resource.data.email == request.auth.token.email;
+      allow delete: if false;
+    }
+
+    match /user_memberships/{userId} {
+      allow get: if isSignedIn() && userId == request.auth.uid;
+      allow list: if false;
+      allow create, update: if isSignedIn()
+        && request.resource.data.userId == userId
+        && request.resource.data.libraryId is string
+        && (
+          (
+            userId == request.auth.uid
+            && request.resource.data.role == 'owner'
+          )
+          ||
+          (
+            isLibraryOwner(request.resource.data.libraryId)
+            && request.resource.data.role == 'viewer'
+          )
+          ||
+          (
+            userId == request.auth.uid
+            && hasAuthEmail()
+            && request.resource.data.role == 'viewer'
+            && exists(/databases/$(database)/documents/libraries/$(request.resource.data.libraryId)/invites/$(authEmailLower()))
+            && get(/databases/$(database)/documents/libraries/$(request.resource.data.libraryId)/invites/$(authEmailLower())).data.role == 'viewer'
+          )
+        );
+      allow delete: if false;
     }
 
     match /books/{bookId} {

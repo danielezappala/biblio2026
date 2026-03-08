@@ -46,6 +46,16 @@ export type ReadingState = {
   updatedAt: Timestamp
 }
 
+export type PendingInvite = {
+  id: string
+  libraryId: string
+  email: string
+  emailLower: string
+  role: 'viewer'
+  createdAt: Timestamp | null
+  updatedAt: Timestamp | null
+}
+
 export type Membership = {
   libraryId: string
   userId: string
