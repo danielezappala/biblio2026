@@ -18,7 +18,8 @@ Il progetto deve essere a costo zero (Firebase piano gratuito), sviluppato preva
 - Accesso web + mobile con Google Sign-In
 - Gestione utenti e permessi (Owner / Viewer)
 - Bootstrap iniziale della prima libreria per l'owner previsto
-- Invito Viewer tramite email associata all'account Google
+- Invito Viewer tramite email associata all''account Google
+- Selezione libreria attiva per Owner/Admin con piu'' librerie disponibili
 - Note e valutazioni condivise
 
 ### Should Have (Fase 2)
@@ -58,7 +59,7 @@ Il progetto deve essere a costo zero (Firebase piano gratuito), sviluppato preva
 ### Sicurezza
 
 - Firestore Rules con controllo membership library
-- Owner: scrittura, gestione Viewer, export CSV
+- Owner: scrittura, gestione Viewer, export CSV, selezione libreria attiva
 - Viewer: sola lettura
 - Bootstrap owner e claim invito consentiti solo nei flussi previsti
 

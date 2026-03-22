@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --mode dev",
     "init:library:test1": "node scripts/dev/init-test1-library.mjs",
+    "seed:books:test1": "node scripts/dev/seed-test1-books.mjs",
     "typecheck": "tsc --noEmit",
     "build": "tsc && vite build --mode dev",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",

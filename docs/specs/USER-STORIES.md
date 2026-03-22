@@ -51,6 +51,19 @@
 
 ---
 
+---
+
+### US-1c Selezionare la libreria attiva
+
+**Come** Owner/Admin con piu' librerie
+**Voglio** vedere le librerie a mia disposizione e selezionarne una come attiva
+**Cosi da** consultare e gestire il catalogo corretto senza cambiare account
+
+**Criteri di accettazione**
+
+- L'Owner vede un pannello con le librerie owner disponibili
+- L'Owner puo' cambiare libreria attiva senza fare logout
+- Dopo il cambio, catalogo e azioni operano sulla nuova libreria primaria
 ## Epic: Consultazione catalogo
 
 ### US-2 Visualizzare catalogo

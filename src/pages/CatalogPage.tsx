@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { useAuthSession, useCatalogBooks } from '@/hooks'
@@ -6,13 +6,21 @@ import { Button } from '@/components/ui/button'
 import { addViewerInviteByEmail } from '@/services'
 
 export function CatalogPage() {
-  const { session, logout } = useAuthSession()
+  const { availableLibraries, isLibrariesLoading, librariesError, session, logout, switchPrimaryLibrary } = useAuthSession()
   const [searchPrefix, setSearchPrefix] = useState<string>('')
   const [viewerEmail, setViewerEmail] = useState<string>('')
+  const [selectedLibraryId, setSelectedLibraryId] = useState<string>('')
+  const [librarySwitchMessage, setLibrarySwitchMessage] = useState<string | null>(null)
+  const [isLibrarySwitchLoading, setIsLibrarySwitchLoading] = useState<boolean>(false)
   const [memberActionMessage, setMemberActionMessage] = useState<string | null>(null)
   const [isMemberActionLoading, setIsMemberActionLoading] = useState<boolean>(false)
   const libraryId = session?.membership.libraryId ?? ''
   const { books, isLoading } = useCatalogBooks(libraryId, searchPrefix)
+  const canManageLibraries = session?.membership.role === 'owner'
+
+  useEffect(() => {
+    setSelectedLibraryId(session?.membership.libraryId ?? '')
+  }, [session?.membership.libraryId])
 
   if (!session) {
     return null
@@ -33,6 +41,25 @@ export function CatalogPage() {
       setMemberActionMessage(message)
     } finally {
       setIsMemberActionLoading(false)
+    }
+  }
+
+  const handleSwitchLibrary = async () => {
+    if (!selectedLibraryId || selectedLibraryId === session.membership.libraryId) {
+      return
+    }
+
+    setLibrarySwitchMessage(null)
+    setIsLibrarySwitchLoading(true)
+
+    try {
+      await switchPrimaryLibrary(selectedLibraryId)
+      setLibrarySwitchMessage('Libreria attiva aggiornata.')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Errore durante cambio libreria.'
+      setLibrarySwitchMessage(message)
+    } finally {
+      setIsLibrarySwitchLoading(false)
     }
   }
 
@@ -64,7 +91,45 @@ export function CatalogPage() {
         />
       </section>
 
-      {session.membership.role === 'owner' ? (
+      {canManageLibraries ? (
+        <section className="mt-4 rounded-xl border bg-card p-4 shadow-sm">
+          <h2 className="text-sm font-semibold uppercase text-muted-foreground">Pannello admin</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Seleziona la libreria owner da usare come libreria attiva.</p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <select
+              value={selectedLibraryId}
+              onChange={(event) => setSelectedLibraryId(event.target.value)}
+              className="h-10 flex-1 rounded-md border bg-background px-3 text-sm"
+              disabled={isLibrariesLoading || isLibrarySwitchLoading}
+            >
+              <option value="" disabled>
+                {isLibrariesLoading ? 'Caricamento librerie...' : 'Seleziona una libreria'}
+              </option>
+              {availableLibraries.map((library) => (
+                <option key={library.libraryId} value={library.libraryId}>
+                  {library.name} ({library.libraryId})
+                </option>
+              ))}
+            </select>
+            <Button
+              type="button"
+              disabled={
+                isLibrariesLoading ||
+                isLibrarySwitchLoading ||
+                !selectedLibraryId ||
+                selectedLibraryId === session.membership.libraryId
+              }
+              onClick={() => void handleSwitchLibrary()}
+            >
+              {isLibrarySwitchLoading ? 'Cambio in corso...' : 'Usa libreria'}
+            </Button>
+          </div>
+          {librariesError ? <p className="mt-2 text-sm text-destructive">{librariesError}</p> : null}
+          {librarySwitchMessage ? <p className="mt-2 text-sm text-muted-foreground">{librarySwitchMessage}</p> : null}
+        </section>
+      ) : null}
+
+      {canManageLibraries ? (
         <section className="mt-4 rounded-xl border bg-card p-4 shadow-sm">
           <h2 className="text-sm font-semibold uppercase text-muted-foreground">Gestione membri</h2>
           <p className="mt-1 text-sm text-muted-foreground">Aggiungi un viewer tramite email Google.</p>

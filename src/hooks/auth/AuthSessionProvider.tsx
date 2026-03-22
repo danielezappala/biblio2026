@@ -8,10 +8,12 @@ import {
   initializeAuthSession,
   loginWithGoogle,
   logoutUser,
+  subscribeOwnedLibraries,
   subscribeAuthState,
   subscribePrimaryMembership,
+  switchPrimaryLibrary,
 } from '@/services'
-import type { AuthIdentity, AuthSession, Membership, SessionStatus } from '@/types'
+import type { AuthIdentity, AuthSession, LibrarySummary, Membership, SessionStatus } from '@/types'
 import { canSelfBootstrapLibrary } from '@/utils/auth'
 import { AuthSessionContext, type AuthSessionContextValue } from './authSessionContext'
 
@@ -22,6 +24,9 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<SessionStatus>('loading')
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null)
   const [membership, setMembership] = useState<Membership | null>(null)
+  const [availableLibraries, setAvailableLibraries] = useState<LibrarySummary[]>([])
+  const [isLibrariesLoading, setIsLibrariesLoading] = useState<boolean>(true)
+  const [librariesError, setLibrariesError] = useState<string | null>(null)
   const hasAttemptedAutoBootstrap = useRef<boolean>(false)
   const hasAttemptedInviteClaim = useRef<boolean>(false)
 
@@ -30,6 +35,9 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
       setFirebaseUser(user)
       if (!user) {
         setMembership(null)
+        setAvailableLibraries([])
+        setIsLibrariesLoading(false)
+        setLibrariesError(null)
         setStatus('unauthenticated')
       }
     })
@@ -51,6 +59,33 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
     if (!firebaseUser) {
       hasAttemptedAutoBootstrap.current = false
       hasAttemptedInviteClaim.current = false
+      setAvailableLibraries([])
+      setIsLibrariesLoading(false)
+      setLibrariesError(null)
+      return undefined
+    }
+
+    setIsLibrariesLoading(true)
+    setLibrariesError(null)
+    const unsubscribeLibraries = subscribeOwnedLibraries(
+      firebaseUser.uid,
+      (nextLibraries) => {
+        setAvailableLibraries(nextLibraries)
+        setIsLibrariesLoading(false)
+        setLibrariesError(null)
+      },
+      (error) => {
+        setAvailableLibraries([])
+        setIsLibrariesLoading(false)
+        setLibrariesError(error.message)
+      }
+    )
+
+    return unsubscribeLibraries
+  }, [firebaseUser])
+
+  useEffect(() => {
+    if (!firebaseUser) {
       return undefined
     }
 
@@ -154,14 +189,24 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
       status,
       authUser,
       session,
+      availableLibraries,
+      isLibrariesLoading,
+      librariesError,
       login: async () => {
         await loginWithGoogle()
       },
       logout: async () => {
         await logoutUser()
       },
+      switchPrimaryLibrary: async (libraryId: string) => {
+        if (!firebaseUser) {
+          throw new Error('Utente non autenticato.')
+        }
+
+        await switchPrimaryLibrary(firebaseUser.uid, libraryId)
+      },
     }),
-    [authUser, session, status]
+    [authUser, availableLibraries, firebaseUser, isLibrariesLoading, librariesError, session, status]
   )
 
   return <AuthSessionContext.Provider value={contextValue}>{children}</AuthSessionContext.Provider>

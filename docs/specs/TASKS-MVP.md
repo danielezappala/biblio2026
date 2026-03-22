@@ -12,6 +12,7 @@
 - [x] Gestione ruoli (Owner/Viewer)
 - [x] Bootstrap prima libreria per owner iniziale
 - [x] Claim invito Viewer tramite email
+- [x] Selezione libreria attiva per Owner/Admin
 
 ## Catalogo
 
@@ -39,19 +40,20 @@
 ## Sicurezza
 
 - [x] Firestore Rules
-- [ ] Test permessi documentati
+- [x] Test permessi documentati
 - [ ] Verifica visibilita'/permessi export CSV per ruolo
 
 ## QA
 
 - [ ] Test mobile documentati
 - [ ] Test duplicati documentati
-- [ ] Test ruoli documentati
+- [x] Test ruoli documentati
 - [ ] Test download CSV su desktop/mobile
 
 ## Execution Tracking
 
 - Maintain `docs/DEV-LOG.md` during development
+- Keep `docs/DEV-LOG.md` in reverse chronological order, with newest entries at the top
 - For each session, annotate difficulties, adopted solutions, and differences between implemented behavior and planned scope
 - Before closing a task with scope drift, ensure the drift is recorded in the development log
 
@@ -90,6 +92,7 @@
 - [x] Seed minimo dati dev per smoke test
 - [x] Flusso no-membership con bootstrap owner o attesa invito
 - [x] Gestione invito Viewer da catalogo Owner
+- [x] Pannello admin per selezione libreria owner attiva
 
 ### QA e validazione
 
@@ -98,8 +101,8 @@
 - [x] `npm run build`
 - [x] Smoke test locale: login valido/non valido
 - [x] Smoke test ruoli: Viewer senza permessi di modifica
-- [ ] Smoke test catalogo: lista, ricerca, dettaglio (bloccato: nessun libro disponibile)
-- [ ] Verifica che tutte le query applicano filtro `libraryId`
+- [x] Smoke test catalogo: lista, ricerca, dettaglio
+- [x] Verifica che tutte le query applicano filtro `libraryId`
 
 ### Milestone interne
 
@@ -120,7 +123,7 @@
 ## Note sullo stato attuale
 
 - Il codice implementa autenticazione Google, bootstrap owner iniziale, claim invito Viewer e consultazione catalogo.
-- Lo Sprint 1 e' tecnicamente vicino alla chiusura, ma mancano ancora evidenze QA manuali documentate.
+- Lo Sprint 1 e' chiuso con evidenze QA manuali annotate in `docs/DEV-LOG.md`.
 - Il build corrente e' verde ma segnala un bundle JavaScript grande, quindi il tema performance resta aperto.
 
 ## Smoke test manuali 2026-03-08
@@ -128,3 +131,12 @@
 - Test 1-6 eseguiti con esito OK
 - Test 7-10 non eseguibili per assenza di libri di test nel catalogo
 - Sprint 1 bloccato solo sulla disponibilita' di dati per validare catalogo e dettaglio con casi reali
+
+## Aggiornamento 2026-03-22
+
+- Seed libri di test completato su libreria primaria e su `Test1`
+- Pannello admin multi-libreria funzionante dopo fix di query e Firestore Rules
+- Diagnostica temporanea usata per isolare il problema e poi rimossa
+- Smoke test finali Sprint 1 completati con esito OK su login, catalogo, ricerca, dettaglio, switch libreria e gestione membri
+- Sprint 1 chiuso formalmente
+

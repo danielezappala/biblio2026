@@ -53,6 +53,13 @@ export type Membership = {
   createdAt: Timestamp
 }
 
+export type LibrarySummary = {
+  libraryId: string
+  name: string
+  ownerUserId: string
+  role: UserRole
+}
+
 export type AuthSession = {
   userId: string
   email: string | null

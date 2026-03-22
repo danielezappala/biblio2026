@@ -77,5 +77,9 @@ These instructions apply to all automated agents working in this repository.
 
 ## Development Log
 - Maintain docs/DEV-LOG.md as a running diary of work done
+- Keep entries in reverse chronological order, with the newest session directly under the entry template
 - For each meaningful development session, record date, scope, difficulties encountered, solution adopted, and deviations from plan
 - When implementation diverges from specs or tasks, log the difference in docs/DEV-LOG.md before closing the task
+- When working on the diary itself, follow `.codex/skills/dev-log-journal/SKILL.md`
+
+

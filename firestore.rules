@@ -21,6 +21,10 @@ service cloud.firestore {
       return /databases/$(database)/documents/membership_invites/$(email);
     }
 
+    function membershipForUserPath(libraryId, userId) {
+      return /databases/$(database)/documents/libraries/$(libraryId)/memberships/$(userId);
+    }
+
     function isLibraryMember(libraryId) {
       return isSignedIn() && exists(membershipPath(libraryId));
     }
@@ -34,7 +38,8 @@ service cloud.firestore {
     }
 
     match /libraries/{libraryId} {
-      allow read: if isLibraryMember(libraryId);
+      allow read: if isLibraryMember(libraryId)
+        || (isSignedIn() && resource.data.ownerUserId == request.auth.uid);
       allow create: if isSignedIn()
         && request.resource.data.ownerUserId == request.auth.uid
         && request.resource.data.name is string;
@@ -99,8 +104,18 @@ service cloud.firestore {
         );
       allow update: if isSignedIn()
         && request.resource.data.userId == userId
-        && isLibraryOwner(request.resource.data.primaryLibraryId)
-        && request.resource.data.role == 'viewer';
+        && (
+          (
+            userId == request.auth.uid
+            && exists(membershipForUserPath(request.resource.data.primaryLibraryId, userId))
+            && request.resource.data.role == get(membershipForUserPath(request.resource.data.primaryLibraryId, userId)).data.role
+          )
+          ||
+          (
+            isLibraryOwner(request.resource.data.primaryLibraryId)
+            && request.resource.data.role == 'viewer'
+          )
+        );
       allow delete: if false;
     }
 
